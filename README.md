@@ -2,7 +2,7 @@
 
 <p align="center"><img src="Source/image.png"></p>
 
-A mod that adds Phantom Clones, inspired by Super Mario Galaxy 2's Cosmic Clones.
+A mod that adds Phantom Clones, inspired by *Super Mario Galaxy 2*'s Cosmic Clones.
 
 The clone will spawn roughly as soon as the stage timer starts, and will track your every move. Try not to stay in the same place for long, as the clone will start progressively draining your ring count. Once your ring count hits zero (and you don't have a shield active), it's Game Over!
 
@@ -33,7 +33,7 @@ cmake --build build --config release
 The resulting build will be located somewhere in `build/` depending on your system.
 
 The following cmake arguments are available when compiling:
-- Use these by adding -D[flag-name]=[value] to the end of the cmake -B build command. For example, to build with RETRO_DISABLE_PLUS set to on, add -DRETRO_DISABLE_PLUS=on to the command.
+- Use these by adding `-D[flag-name]=[value]` to the end of the `cmake -B build` command. For example, to build with `RETRO_DISABLE_PLUS` set to on, add `-DRETRO_DISABLE_PLUS=on` to the command.
 
 ### Mod Flags
 - `RETRO_REVISION`: What revision to compile for. Takes an integer, defaults to `3` (RSDKv5U).
