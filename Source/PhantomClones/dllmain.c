@@ -13,6 +13,7 @@ void (*HUD_EnableRingFlash)(void) = NULL;
 bool32 (*Player_CheckCollisionTouch)(EntityPlayer *player, void *entity, Hitbox *entityHitbox) = NULL;
 bool32 (*Player_Hurt)(EntityPlayer *player, void *e)                                           = NULL;
 bool32 (*Player_CheckValidState)(EntityPlayer *player)                                         = NULL;
+StateMachine(Player_State_Static)                                                              = NULL;
 
 StateMachine(Ring_State_Lost)  = NULL;
 StateMachine(Ring_Draw_Normal) = NULL;
@@ -31,6 +32,7 @@ void InitModAPI(void)
     Player_CheckCollisionTouch = Mod.GetPublicFunction(NULL, "Player_CheckCollisionTouch");
     Player_CheckValidState     = Mod.GetPublicFunction(NULL, "Player_CheckValidState");
     Player_Hurt                = Mod.GetPublicFunction(NULL, "Player_Hurt");
+    Player_State_Static        = Mod.GetPublicFunction(NULL, "Player_State_Static");
     Ring_State_Lost            = Mod.GetPublicFunction(NULL, "Ring_State_Lost");
     Ring_Draw_Normal           = Mod.GetPublicFunction(NULL, "Ring_Draw_Normal");
 

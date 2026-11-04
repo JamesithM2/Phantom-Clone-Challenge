@@ -181,6 +181,7 @@
     <ClInclude Include="..\GameAPI\C\GameAPI\GameObjects.h" />
     <ClInclude Include="..\GameAPI\C\GameAPI\GameVariables.h" />
     <ClInclude Include="GlobalObjects.h" />
+    <ClInclude Include="LottoMachine.h" />
     <ClInclude Include="ModConfig.h" />
     <ClInclude Include="PhantomClone.h" />
     <ClInclude Include="Player.h" />

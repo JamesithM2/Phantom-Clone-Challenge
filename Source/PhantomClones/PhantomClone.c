@@ -1,5 +1,6 @@
 #include "PhantomClone.h"
 #include "GlobalObjects.h"
+#include "LottoMachine.h"
 #include "ModConfig.h"
 
 ObjectPhantomClone *PhantomClone;
@@ -50,10 +51,12 @@ void PhantomClone_LateUpdate(void)
     // player interaction
     Hitbox *cloneHitbox = RSDK.GetHitbox(&self->animator, 0);
 
-    EntityPlayer *player = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
+    EntityPlayer *player             = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
+    ObjectLottoMachine *LottoMachine = Mod.FindObject("LottoMachine");
 
     if (!self->spawnDelay) {
-        if (Player_CheckValidState(player) && !player->invincibleTimer && !player->blinkTimer) {
+        if (Player_CheckValidState(player) && player->state != Player_State_Static && !player->invincibleTimer && !player->blinkTimer
+            && (!LottoMachine || !((1 << player->playerID) & LottoMachine->activePlayers))) {
             if (Player_CheckCollisionTouch(player, self, cloneHitbox)) {
                 if (++self->timer >= 7) {
                     if (player->rings) {

@@ -475,4 +475,6 @@ extern bool32 (*Player_CheckCollisionTouch)(EntityPlayer *player, void *entity, 
 extern bool32 (*Player_CheckValidState)(EntityPlayer *player);
 extern bool32 (*Player_Hurt)(EntityPlayer *player, void *e);
 
+extern StateMachine(Player_State_Static);
+
 #endif //! OBJ_PLAYER_H

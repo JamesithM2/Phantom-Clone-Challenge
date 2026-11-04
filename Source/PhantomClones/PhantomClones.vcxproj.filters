@@ -45,5 +45,8 @@
     <ClInclude Include="ModConfig.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="LottoMachine.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
