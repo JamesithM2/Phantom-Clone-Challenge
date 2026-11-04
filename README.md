@@ -37,7 +37,7 @@ The following cmake arguments are available when compiling:
 
 ### Mod Flags
 - `RETRO_REVISION`: What revision to compile for. Takes an integer, defaults to `3` (RSDKv5U).
-- `RETRO_MOD_LOADER_VER`: Manually sets the mod loader version. Takes an integer, defaults to the current latest version (ModAPIv2).
+- `RETRO_MOD_LOADER_VER`: Manually sets the mod loader version. Takes an integer, defaults to `2` (ModAPIv2).
 - `RETRO_INCLUDE_EDITOR`: Whether the mod should include functions and other necessities for RSDKv5 scene editors, such as RetroED (this is not important for this mod). Takes a boolean, defaults to `on`.
 - `MANIA_PREPLUS`: Whether or not to build a pre-plus version of Sonic Mania. Takes a boolean, defaults to `off`.
 - `MANIA_FIRST_RELEASE`: Whether or not to build for the first console release of Mania. Takes a boolean, defaults to `off`.
