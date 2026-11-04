@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<game xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <objects>
+    <object name="PhantomClone" />
+  </objects>
+  <sounds>
+    <soundfx path="Global/CloneAppear.wav" />
+    <soundfx path="Global/CloneSpawn.wav" />
+    <soundfx path="Global/CloneHit.wav" />
+  </sounds>
+</game>
