@@ -33,6 +33,14 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# CMake
+build/*.cmake
+build/*.sln
+build/*.vcxproj
+build/*.vcxproj.filters
+CMakeFiles/
+CMakeCache.txt
+
 # safety
 *.rsdk
 *.dll

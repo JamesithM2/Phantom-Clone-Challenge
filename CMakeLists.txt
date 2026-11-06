@@ -47,7 +47,7 @@ endif()
 add_library(PhantomClones SHARED
     ${GAMEAPI}/C/GameAPI/Game.c
     ${MOD_NAME}/dllmain.c
-    ${MOD_NAME}/PhantomClone.c
+    ${MOD_NAME}/Objects/PhantomClone.c
 )
 
 target_include_directories(PhantomClones PRIVATE
