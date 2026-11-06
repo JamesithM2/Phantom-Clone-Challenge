@@ -173,18 +173,18 @@
   <ItemGroup>
     <ClCompile Include="..\GameAPI\C\GameAPI\Game.c" />
     <ClCompile Include="dllmain.c" />
-    <ClCompile Include="PhantomClone.c" />
+    <ClCompile Include="Objects\PhantomClone.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GameAPI\C\GameAPI\Game.h" />
     <ClInclude Include="..\GameAPI\C\GameAPI\GameLink.h" />
     <ClInclude Include="..\GameAPI\C\GameAPI\GameObjects.h" />
     <ClInclude Include="..\GameAPI\C\GameAPI\GameVariables.h" />
-    <ClInclude Include="GlobalObjects.h" />
-    <ClInclude Include="LottoMachine.h" />
     <ClInclude Include="ModConfig.h" />
-    <ClInclude Include="PhantomClone.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="Objects\GlobalObjects.h" />
+    <ClInclude Include="Objects\LottoMachine.h" />
+    <ClInclude Include="Objects\PhantomClone.h" />
+    <ClInclude Include="Objects\Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

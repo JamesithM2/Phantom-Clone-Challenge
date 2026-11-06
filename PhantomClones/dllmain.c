@@ -1,8 +1,9 @@
 #include "GameAPI/Game.h"
-#include "PhantomClone.h"
-#include "Player.h"
-#include "GlobalObjects.h"
 #include "ModConfig.h"
+
+#include "Objects/GlobalObjects.h"
+#include "Objects/PhantomClone.h"
+#include "Objects/Player.h"
 
 ModConfig config;
 

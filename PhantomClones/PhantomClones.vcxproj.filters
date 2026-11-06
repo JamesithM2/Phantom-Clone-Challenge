@@ -8,6 +8,9 @@
     <Filter Include="GameAPI">
       <UniqueIdentifier>{2b00ea04-a1d3-4639-b021-f84d63a0646a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Objects">
+      <UniqueIdentifier>{da271ac0-08cd-4b03-aea0-d9ba6eec04a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.c">
@@ -16,8 +19,8 @@
     <ClCompile Include="..\GameAPI\C\GameAPI\Game.c">
       <Filter>GameAPI</Filter>
     </ClCompile>
-    <ClCompile Include="PhantomClone.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Objects\PhantomClone.c">
+      <Filter>Source Files\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -33,20 +36,20 @@
     <ClInclude Include="..\GameAPI\C\GameAPI\GameVariables.h">
       <Filter>GameAPI</Filter>
     </ClInclude>
-    <ClInclude Include="PhantomClone.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalObjects.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="ModConfig.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LottoMachine.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Objects\GlobalObjects.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\LottoMachine.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\PhantomClone.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Player.h">
+      <Filter>Source Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

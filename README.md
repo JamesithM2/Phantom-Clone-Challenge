@@ -1,6 +1,6 @@
 # Phantom Clone Challenge
 
-<p align="center"><img src="Source/image.png"></p>
+<p align="center"><img src="image.png"></p>
 
 A mod that adds Phantom Clones, inspired by *Super Mario Galaxy 2*'s Cosmic Clones.
 
@@ -24,7 +24,7 @@ git submodule update --remote --init --recursive
 ```
 
 ## CMake
-Assure that [GameAPI](https://github.com/RSDKModding/RSDKv5-GameAPI) has been cloned correctly, then type the following commands in `Source/`:
+Assure that [GameAPI](https://github.com/RSDKModding/RSDKv5-GameAPI) has been cloned correctly, then type the following commands in the root of the repository:
 ```
 cmake -B build
 cmake --build build --config release
@@ -44,7 +44,7 @@ The following cmake arguments are available when compiling:
 - `GAME_VERSION`: Which release version of Sonic Mania to target for. Takes an integer, defaults to `3` when `MANIA_PRE_PLUS` is enabled, and `6` otherwise (last Steam release).
 
 ## Visual Studio
-Open the Visual Studio solution (`.sln`) in the `Source/` directory and build. Double check to make sure certain things like engine revision and mod loader version are consistent with the ones for your decomp install.
+Open the Visual Studio solution (`.sln`) in the root directory and build. Double check to make sure certain things like engine revision and mod loader version are consistent with the ones for your decomp install.
 
 ## Android
-[Ensure the decomp has been set up for building on Android](https://github.com/RSDKModding/RSDKv5-Decompilation/blob/master/dependencies/android/README.md). Follow the instructions to set up symlinks, then add the mod as a symbolic link (make sure the path leads to `Source/`).
+[Ensure the decomp has been set up for building on Android](https://github.com/RSDKModding/RSDKv5-Decompilation/blob/master/dependencies/android/README.md). Follow the instructions to set up symlinks, then add the mod as a symbolic link (make sure the path leads to the root directory).
