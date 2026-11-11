@@ -5,6 +5,7 @@
 
 typedef struct {
     int32 cloneCount;
+    bool32 allowInBosses;
 } ModConfig;
 
 extern ModConfig config;

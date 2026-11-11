@@ -18,20 +18,8 @@ void PhantomClone_LateUpdate(void)
 
     ObjectExplosion *Explosion = Mod.FindObject("Explosion");
     ObjectPlayer *Player       = Mod.FindObject("Player");
+    ObjectRing *Ring           = Mod.FindObject("Ring");
     ObjectZone *Zone           = Mod.FindObject("Zone");
-
-    // delay before the clone actually shows up
-    if (self->spawnDelay) {
-        self->spawnDelay--;
-        if (!self->spawnDelay) {
-            RSDK.PlaySfx(PhantomClone->sfxSpawn, false, 0xFF);
-
-            EntityExplosion *explosion = CREATE_ENTITY(Explosion, INT_TO_VOID(EXPLOSION_ENEMY), self->position.x, self->position.y);
-            explosion->drawGroup       = Zone->objectDrawGroup[1];
-        }
-    }
-
-    PhantomClone_HandleParticleFX();
 
     // get info from universal trail frames and set them to the clone
     self->trailOffset++;
@@ -43,84 +31,105 @@ void PhantomClone_LateUpdate(void)
     self->position  = PhantomClone->frame[offset].position;
     self->direction = PhantomClone->frame[offset].direction;
     self->rotation  = PhantomClone->frame[offset].rotation;
-    self->visible   = PhantomClone->frame[offset].visible;
     self->scale     = PhantomClone->frame[offset].scale;
     self->drawGroup = PhantomClone->frame[offset].drawGroup;
+    self->visible   = !self->processState ? PhantomClone->frame[offset].visible : false;
     memcpy(&self->animator, &PhantomClone->frame[offset].animator, sizeof(PhantomClone->frame[offset].animator));
 
-    // player interaction
-    Hitbox *cloneHitbox = RSDK.GetHitbox(&self->animator, 0);
+    // process clone states
+    switch (self->processState) {
+        case PROCESS_TYPE_ACTIVE:
+            PhantomClone_CheckProcessState();
+            PhantomClone_HandleParticleFX();
 
-    EntityPlayer *player             = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
-    ObjectLottoMachine *LottoMachine = Mod.FindObject("LottoMachine");
+            // delay before the clone actually shows up
+            if (self->spawnDelay) {
+                self->spawnDelay--;
+                if (!self->spawnDelay) {
+                    RSDK.PlaySfx(PhantomClone->sfxSpawn, false, 0xFF);
 
-    if (!self->spawnDelay) {
-        if (Player_CheckValidState(player) && player->state != Player_State_Static && !player->invincibleTimer && !player->blinkTimer
-            && (!LottoMachine || !((1 << player->playerID) & LottoMachine->activePlayers))) {
-            if (Player_CheckCollisionTouch(player, self, cloneHitbox)) {
-                if (++self->timer >= 7) {
-                    if (player->rings) {
-                        player->rings--;
-                        RSDK.PlaySfx(PhantomClone->sfxHit, false, 0xFF);
-                    }
-                    else
-                        Player_Hurt(player, self);
-
-                    self->timer = 0;
+                    EntityExplosion *explosion = CREATE_ENTITY(Explosion, INT_TO_VOID(EXPLOSION_ENEMY), self->position.x, self->position.y);
+                    explosion->drawGroup       = Zone->objectDrawGroup[1];
                 }
-
-                if (player->rings)
-                    HUD_EnableRingFlash();
             }
-        }
+            else {
+                // player interaction
+                Hitbox *cloneHitbox  = RSDK.GetHitbox(&self->animator, 0);
+                EntityPlayer *player = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
+
+                if (Player_CheckValidState(player) && player->state != Player_State_Static && !player->invincibleTimer && !player->blinkTimer) {
+                    if (Player_CheckCollisionTouch(player, self, cloneHitbox)) {
+                        if (++self->timer >= 7) {
+                            if (player->rings) {
+                                player->rings--;
+                                RSDK.PlaySfx(PhantomClone->sfxHit, false, 0xFF);
+                            }
+                            else
+                                Player_Hurt(player, self);
+
+                            self->timer = 0;
+                        }
+
+                        if (player->rings)
+                            HUD_EnableRingFlash();
+                    }
+                }
+            }
+            break;
+
+        case PROCESS_TYPE_VANISH_TEMP:
+            if (!self->spawnDelay) {
+                if (RSDK.GetEntitySlot(self) == SLOT_CLONESTACK_START)
+                    RSDK.PlaySfx(PhantomClone->sfxVanish, false, 0xFF);
+
+                CREATE_ENTITY(Explosion, INT_TO_VOID(EXPLOSION_ENEMY), self->position.x, self->position.y);
+            }
+
+            RSDK.StopSfx(PhantomClone->sfxAppear);
+            self->processState = PROCESS_TYPE_FROZEN;
+            break;
+
+        case PROCESS_TYPE_VANISH_PERM:
+            if (RSDK.GetEntitySlot(self) == SLOT_CLONESTACK_START)
+                RSDK.PlaySfx(PhantomClone->sfxSpawn, false, 0xFF);
+
+            CREATE_ENTITY(Explosion, INT_TO_VOID(EXPLOSION_ENEMY), self->position.x, self->position.y);
+
+            int32 count = 3;
+            int32 angle = 16 * (12 - (count >> 1));
+            for (int32 i = 0; i < count; ++i) {
+                EntityRing *ring = CREATE_ENTITY(Ring, INT_TO_VOID(1), self->position.x, self->position.y);
+                ring->velocity.x = RSDK.Cos256(angle) << 9;
+                ring->velocity.y = RSDK.Sin256(angle) << 9;
+                ring->timer          = 32;
+                ring->collisionPlane = RSDK_GET_ENTITY(SLOT_PLAYER1, Player)->collisionPlane;
+                ring->inkEffect      = INK_ALPHA;
+                ring->alpha          = 256;
+                ring->state          = Ring_State_Lost;
+                ring->animator.speed = 512;
+                ring->stateDraw      = Ring_Draw_Normal;
+                angle += 16;
+            }
+
+            destroyEntity(self);
+            break;
+
+        case PROCESS_TYPE_FROZEN:
+            if (!PhantomClone_CheckRespawn()) {
+                if (RSDK.GetEntitySlot(self) == SLOT_CLONESTACK_START)
+                    RSDK.PlaySfx(PhantomClone->sfxAppear, false, 0xFF);
+
+                self->spawnDelay = 180;
+                self->processState = PROCESS_TYPE_ACTIVE;
+            }
+            break;
     }
 }
 
 void PhantomClone_StaticUpdate(void) 
 {
-    if (PhantomClone_CheckVanish()) {
-        // handle clone vanishing
-        ObjectExplosion *Explosion = Mod.FindObject("Explosion");
-        ObjectZone *Zone           = Mod.FindObject("Zone");
-
-        foreach_active(PhantomClone, clone)
-        {
-            if (clone->spawnDelay) {
-                RSDK.StopSfx(PhantomClone->sfxAppear);
-                destroyEntity(clone);
-            }
-            else {
-                if (RSDK.GetEntitySlot(clone) == SLOT_CLONESTACK_START)
-                    RSDK.PlaySfx(PhantomClone->sfxSpawn, false, 0xFF);
-
-                EntityExplosion *explosion = CREATE_ENTITY(Explosion, INT_TO_VOID(EXPLOSION_ENEMY), clone->position.x, clone->position.y);
-                explosion->drawGroup       = Zone->objectDrawGroup[1];
-
-                PhantomClone_SpawnRings(clone, 3, 0);
-
-                destroyEntity(clone);
-            }
-        }
-
-        // reset info
-        PhantomClone->trailFrame = 0;
-        PhantomClone->spawnTimer = 0;
-        PhantomClone->spawnCount = 0;
-
-        for (int32 f = 0; f < CLONE_MAX_FRAMECOUNT; ++f) {
-            PhantomClone->frame[f].position.x = 0;
-            PhantomClone->frame[f].position.y = 0;
-            PhantomClone->frame[f].direction  = FLIP_NONE;
-            PhantomClone->frame[f].rotation   = 0;
-            PhantomClone->frame[f].visible    = false;
-            PhantomClone->frame[f].scale.x    = 512;
-            PhantomClone->frame[f].scale.y    = 512;
-            PhantomClone->frame[f].drawGroup  = 0;
-            memcpy(&PhantomClone->frame[f].animator, NULL, 0);
-        }
-    }
-    else {
-        // copy player info
+    // copy player info
+    if (SceneInfo->timeEnabled) {
         PhantomClone->trailFrame++;
         if (PhantomClone->trailFrame >= CLONE_MAX_FRAMECOUNT)
             PhantomClone->trailFrame = 0;
@@ -166,10 +175,12 @@ void PhantomClone_Draw(void)
 
     // my awful attempt at tinting the player sprite
     // techincally I could get away with using a tint lookup table but idk how that works LOL
-    uint32 colorStore[0x80];
+    uint32 colorStore[2][0x80];
     for (int32 c = 0; c < 0x80; ++c) {
-        colorStore[c] = RSDK.GetPaletteEntry(0, c);
+        colorStore[0][c] = RSDK.GetPaletteEntry(0, c);
+        colorStore[1][c] = RSDK.GetPaletteEntry(1, c);
         RSDK.SetPaletteEntry(0, c, 0xE000E0);
+        RSDK.SetPaletteEntry(1, c, 0xE000E0);
     }
 
     self->inkEffect = INK_ADD;
@@ -181,7 +192,10 @@ void PhantomClone_Draw(void)
     self->alpha     = 0;
     self->inkEffect = INK_NONE;
 
-    for (int32 c = 0; c < 0x80; ++c) RSDK.SetPaletteEntry(0, c, colorStore[c]);
+    for (int32 c = 0; c < 0x80; ++c) {
+        RSDK.SetPaletteEntry(0, c, colorStore[0][c]);
+        RSDK.SetPaletteEntry(1, c, colorStore[1][c]);
+    }
 }
 
 void PhantomClone_Create(void *data) 
@@ -206,15 +220,13 @@ void PhantomClone_StageLoad(void)
     PhantomClone->spawnCount = 0;
 
     PhantomClone->cloneCount = config.cloneCount;
-    if (PhantomClone->cloneCount < 1)
-        PhantomClone->cloneCount = 1;
-
-    if (PhantomClone->cloneCount > 3)
+    if (PhantomClone->cloneCount < 1 || PhantomClone->cloneCount > 3)
         PhantomClone->cloneCount = 1;
 
     PhantomClone->sfxAppear = RSDK.GetSfx("Global/CloneAppear.wav");
     PhantomClone->sfxSpawn  = RSDK.GetSfx("Global/CloneSpawn.wav");
     PhantomClone->sfxHit    = RSDK.GetSfx("Global/CloneHit.wav");
+    PhantomClone->sfxVanish = RSDK.GetSfx("Global/CloneVanish.wav");
 
     // reset all copied player info
     for (int32 f = 0; f < CLONE_MAX_FRAMECOUNT; ++f) {
@@ -275,38 +287,49 @@ void PhantomClone_HandleParticleFX(void)
     }
 }
 
-void PhantomClone_SpawnRings(EntityPhantomClone *clone, int32 rings, uint8 cPlane)
+void PhantomClone_CheckProcessState()
 {
     RSDK_THIS(PhantomClone);
 
-    ObjectRing *Ring = Mod.FindObject("Ring");
+    ObjectMusic *Music               = Mod.FindObject("Music");
+    ObjectPlayer *Player             = Mod.FindObject("Player");
+    ObjectLottoMachine *LottoMachine = Mod.FindObject("LottoMachine");
 
-    int32 innerRingCount = CLAMP(rings, 0, 16);
+    EntityPlayer *player = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
 
-    int32 angleStart = 0xC0 - 8 * (innerRingCount & -2);
-    int32 angle      = angleStart + 8;
-    if (!(innerRingCount & 1))
-        angle = angleStart - 8;
+    bool32 bossTrack = false;
+    if (Music->activeTrack == TRACK_MINIBOSS || Music->activeTrack == TRACK_HBHBOSS || Music->activeTrack == TRACK_EGGMAN1
+        || Music->activeTrack == TRACK_EGGMAN2 || Music->activeTrack == TRACK_HBHMISCHIEF)
+        bossTrack = true;
 
-    for (int32 i = 0; i < innerRingCount; ++i) {
-        EntityRing *ring     = CREATE_ENTITY(Ring, clone, clone->position.x, clone->position.y);
-        ring->velocity.x     = RSDK.Cos256(angle) << 9;
-        ring->velocity.y     = RSDK.Sin256(angle) << 9;
-        ring->animator.speed = 0x200;
-        ring->collisionPlane = cPlane;
-        ring->inkEffect      = INK_ALPHA;
-        ring->alpha          = 0x100;
-        ring->isPermanent    = true;
-        ring->state          = Ring_State_Lost;
-        ring->stateDraw      = Ring_Draw_Normal;
-        ring->drawGroup      = self->drawGroup;
-        ring->moveType       = RING_MOVE_LINEAR;
-        angle += 0x10;
-    }
+    // checks circumstances where clones should temporaily disappear:
+    if (player->superState || player->classID != Player->classID || (LottoMachine && ((1 << player->playerID) & LottoMachine->activePlayers)))
+        self->processState = PROCESS_TYPE_VANISH_TEMP;
+
+    // checks if the clones should vanish for the rest of the stages duration
+    if (bossTrack && !config.allowInBosses)
+        self->processState = PROCESS_TYPE_VANISH_PERM;
 }
 
-bool32 PhantomClone_CheckSceneExceptions(void) 
-{ 
+bool32 PhantomClone_CheckRespawn() 
+{
+    RSDK_THIS(PhantomClone);
+
+    // checks for respawn after temporary vanish
+    ObjectMusic *Music               = Mod.FindObject("Music");
+    ObjectPlayer *Player             = Mod.FindObject("Player");
+    ObjectLottoMachine *LottoMachine = Mod.FindObject("LottoMachine");
+
+    EntityPlayer *player = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
+
+    if (player->superState || player->classID != Player->classID || (LottoMachine && ((1 << player->playerID) & LottoMachine->activePlayers)))
+        return true;
+
+    return false;
+}
+
+bool32 PhantomClone_CheckSceneExceptions(void)
+{
     // function for checking specific scenes in which clone(s) should NEVER appear
     // this mainly checks for scenes that are only used for cutscenes
 
@@ -317,37 +340,6 @@ bool32 PhantomClone_CheckSceneExceptions(void)
     // in the case of LRZ3/TMZ3, these are both boss acts where the clone(s) would only be around for a couple of seconds
     // so there's not really a good reason to spawn them in here
     if (RSDK.CheckSceneFolder("LRZ3") || RSDK.CheckSceneFolder("TMZ3"))
-        return true;
-
-    return false;
-}
-
-bool32 PhantomClone_CheckVanish() 
-{ 
-    RSDK_THIS(PhantomClone);
-
-    ObjectMusic *Music   = Mod.FindObject("Music");
-    ObjectPlayer *Player = Mod.FindObject("Player");
-
-    // checks circumstances where clones should disappear such as:
-
-    // if the player entity isn't using its class ID (i.e. Debug Mode)
-    EntityPlayer *player = RSDK_GET_ENTITY(SLOT_PLAYER1, Player);
-    if (player->classID != Player->classID)
-        return true;
-
-    // if the player is super (clones can't hurt the player anyways, plus there's no good way to handle super palettes between clones)
-    if (player->superState)
-        return true;
-
-    // if the stage timer isn't active
-    if (!SceneInfo->timeEnabled)
-        return true;
-
-    // if any boss music is playing
-    int32 track = Music->activeTrack;
-
-    if (track == TRACK_MINIBOSS || track == TRACK_HBHBOSS || track == TRACK_EGGMAN1 || track == TRACK_EGGMAN2 || track == TRACK_HBHMISCHIEF)
         return true;
 
     return false;

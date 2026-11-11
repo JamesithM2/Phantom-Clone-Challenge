@@ -9,9 +9,10 @@ The clone will spawn roughly as soon as the stage timer starts, and will track y
 Don't worry for too long though, any clone will despawn during a boss and will produce three extra rings for you to collect.
 
 ## Mod Settings
-Upon starting the mod, the engine will automatically generate a `modSettings.ini` file for you to change things to your liking.
+Upon starting the mod, the game will automatically generate a `modSettings.ini` file for you in the mod's root folder to change things to your liking.
 
-`cloneCount` - Determines how many clones will be active. Defaults to one. Entering any number before one or after three will return as one clone.
+- `CloneCount` - Determines how many clones will be active. Defaults to `1`. Entering any number before one or after three will return as one clone.
+- `AllowInBosses` - Determines if clones should be able to follow you into boss battles or not. Defaults to `N`.
 
 # Building
 In order to build, recursively clone the repo using [Git](https://git-scm.com/install/) with the repo's url: `git clone https://github.com/JamesithM2/Phantom-Clone-Challenge --recursive`

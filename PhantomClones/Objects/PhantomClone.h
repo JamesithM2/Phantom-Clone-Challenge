@@ -13,6 +13,13 @@ typedef enum {
     SLOT_CLONESTACK_END   = 53,
 } ReservedEntitySlots;
 
+typedef enum {
+    PROCESS_TYPE_ACTIVE, // active, process normally
+    PROCESS_TYPE_VANISH_TEMP, // only vanish temporarily, then spawn back later
+    PROCESS_TYPE_VANISH_PERM, // vanish permanently for the rest of the player's time in the current stage (also spawns rings)
+    PROCESS_TYPE_FROZEN, // hold clone until it can respawn again
+} CloneProcessStates;
+
 typedef struct {
     Vector2 position;
     uint8 direction;
@@ -35,12 +42,13 @@ typedef struct {
     uint16 sfxAppear;
     uint16 sfxSpawn;
     uint16 sfxHit;
+    uint16 sfxVanish;
 } ObjectPhantomClone;
 
 // Entity Class
 typedef struct {
     RSDK_ENTITY
-    EntityPlayer *target;
+    int32 processState;
     int32 trailOffset;
     int32 spawnDelay;
     int32 timer;
@@ -66,8 +74,8 @@ void PhantomClone_Serialize(void);
 // Extra Entity Functions
 void PhantomClone_SpawnParticleFX(int32 x, int32 y);
 void PhantomClone_HandleParticleFX(void);
-void PhantomClone_SpawnRings(EntityPhantomClone *clone, int32 rings, uint8 cPlane);
+void PhantomClone_CheckProcessState();
 bool32 PhantomClone_CheckSceneExceptions(void);
-bool32 PhantomClone_CheckVanish();
+bool32 PhantomClone_CheckRespawn();
 
 #endif //! OBJ_PHANTOMCLONE_H

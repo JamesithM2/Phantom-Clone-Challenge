@@ -42,16 +42,18 @@ void InitModAPI(void)
 
     // Set mod config
     config.cloneCount = Mod.GetSettingsInteger("", "Clone:CloneCount", 1);
+    config.allowInBosses = Mod.GetSettingsBool("", "Clone:AllowInBosses", false);
     
     Mod.SetSettingsInteger("Clone:CloneCount", config.cloneCount);
+    Mod.SetSettingsBool("Clone:AllowInBosses", config.allowInBosses);
     Mod.SaveSettings();
 
     // Add public funcs
     ADD_PUBLIC_FUNC(PhantomClone_SpawnParticleFX);
     ADD_PUBLIC_FUNC(PhantomClone_HandleParticleFX);
-    ADD_PUBLIC_FUNC(PhantomClone_SpawnRings);
+    ADD_PUBLIC_FUNC(PhantomClone_CheckProcessState);
+    ADD_PUBLIC_FUNC(PhantomClone_CheckRespawn);
     ADD_PUBLIC_FUNC(PhantomClone_CheckSceneExceptions);
-    ADD_PUBLIC_FUNC(PhantomClone_CheckVanish);
 }
 
 #if RETRO_USE_MOD_LOADER

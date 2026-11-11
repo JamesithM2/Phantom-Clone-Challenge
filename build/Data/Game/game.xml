@@ -7,5 +7,6 @@
     <soundfx path="Global/CloneAppear.wav" />
     <soundfx path="Global/CloneSpawn.wav" />
     <soundfx path="Global/CloneHit.wav" />
+    <soundfx path="Global/CloneVanish.wav" />
   </sounds>
 </game>
