@@ -35,6 +35,10 @@ void PhantomClone_LateUpdate(void)
     self->drawGroup = PhantomClone->frame[offset].drawGroup;
     self->visible   = !self->processState ? PhantomClone->frame[offset].visible : false;
     memcpy(&self->animator, &PhantomClone->frame[offset].animator, sizeof(PhantomClone->frame[offset].animator));
+    
+    self->tailDirection = PhantomClone->frame[offset].tailDirection;
+    self->tailRotation  = PhantomClone->frame[offset].tailRotation;
+    memcpy(&self->tailAnimator, &PhantomClone->frame[offset].tailAnimator, sizeof(PhantomClone->frame[offset].tailAnimator));
 
     // process clone states
     switch (self->processState) {
@@ -147,6 +151,12 @@ void PhantomClone_StaticUpdate(void)
         PhantomClone->frame[buffer].drawGroup = player->drawGroup;
         memcpy(&PhantomClone->frame[buffer].animator, &player->animator, sizeof(player->animator));
 
+        if (player->tailFrames != (uint16)-1) {
+            PhantomClone->frame[buffer].tailDirection = player->tailDirection;
+            PhantomClone->frame[buffer].tailRotation  = player->tailRotation;
+            memcpy(&PhantomClone->frame[buffer].tailAnimator, &player->tailAnimator, sizeof(player->tailAnimator));
+        }
+
         // spawn clones
         PhantomClone->spawnTimer++;
         if (PhantomClone->spawnTimer == 60) {
@@ -170,8 +180,18 @@ void PhantomClone_Draw(void)
 {
     RSDK_THIS(PhantomClone);
 
-    if (!self->spawnDelay)
+    if (!self->spawnDelay) {
+        int32 rotStore  = self->rotation;
+        int32 dirStore  = self->direction;
+        self->rotation  = self->tailRotation;
+        self->direction = self->tailDirection;
+        RSDK.DrawSprite(&self->tailAnimator, NULL, false);
+
+        self->rotation  = rotStore;
+        self->direction = dirStore;
+
         RSDK.DrawSprite(&self->animator, NULL, false);
+    }
 
     // my awful attempt at tinting the player sprite
     // techincally I could get away with using a tint lookup table but idk how that works LOL
@@ -186,8 +206,18 @@ void PhantomClone_Draw(void)
     self->inkEffect = INK_ADD;
     self->alpha     = 0xA0;
 
-    if (!self->spawnDelay)
+    if (!self->spawnDelay) {
+        int32 rotStore  = self->rotation;
+        int32 dirStore  = self->direction;
+        self->rotation  = self->tailRotation;
+        self->direction = self->tailDirection;
+        RSDK.DrawSprite(&self->tailAnimator, NULL, false);
+
+        self->rotation  = rotStore;
+        self->direction = dirStore;
+
         RSDK.DrawSprite(&self->animator, NULL, false);
+    }
 
     self->alpha     = 0;
     self->inkEffect = INK_NONE;
@@ -307,7 +337,7 @@ void PhantomClone_CheckProcessState()
         self->processState = PROCESS_TYPE_VANISH_TEMP;
 
     // checks if the clones should vanish for the rest of the stages duration
-    if (bossTrack && !config.allowInBosses)
+    if ((bossTrack && !config.allowInBosses) || !SceneInfo->timeEnabled)
         self->processState = PROCESS_TYPE_VANISH_PERM;
 }
 
@@ -339,7 +369,7 @@ bool32 PhantomClone_CheckSceneExceptions(void)
 
     // in the case of LRZ3/TMZ3, these are both boss acts where the clone(s) would only be around for a couple of seconds
     // so there's not really a good reason to spawn them in here
-    if (RSDK.CheckSceneFolder("LRZ3") || RSDK.CheckSceneFolder("TMZ3"))
+    if ((RSDK.CheckSceneFolder("LRZ3") || RSDK.CheckSceneFolder("TMZ3")) && !config.allowInBosses)
         return true;
 
     return false;

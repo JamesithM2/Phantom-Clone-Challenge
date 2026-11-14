@@ -28,6 +28,9 @@ typedef struct {
     Vector2 scale;
     uint16 drawGroup;
     Animator animator;
+    Animator tailAnimator;
+    int32 tailRotation;
+    uint8 tailDirection;
 } CloneFrame;
 
 // Object Class
@@ -52,7 +55,10 @@ typedef struct {
     int32 trailOffset;
     int32 spawnDelay;
     int32 timer;
+    int32 tailRotation;
+    uint8 tailDirection;
     Animator animator;
+    Animator tailAnimator;
 } EntityPhantomClone;
 
 // Object Entity
